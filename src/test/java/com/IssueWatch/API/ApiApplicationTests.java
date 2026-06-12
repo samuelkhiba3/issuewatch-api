@@ -1,4 +1,4 @@
-package IssueWatch.API;
+package com.IssueWatch.API;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
