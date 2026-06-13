@@ -2,6 +2,7 @@ package com.IssueWatch.API.services;
 
 import com.IssueWatch.API.entities.Role;
 import com.IssueWatch.API.entities.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,9 +42,33 @@ public class JwtService {
                 .compact();
     }
 
-    public SecretKey getSigningKey(){
+    private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(
                 jwtSecrete.getBytes(StandardCharsets.UTF_8)
         );
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public String extractEmail(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    private boolean isTokenExpired(String token) {
+        Date expiration = extractAllClaims(token).getExpiration();
+
+        return expiration.before(new Date());
+    }
+
+    public boolean isTokenValid(String token, User user) {
+        String email = extractEmail(token);
+
+        return email.equals(user.getEmail()) && !isTokenExpired(token);
     }
 }
