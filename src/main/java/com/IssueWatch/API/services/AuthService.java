@@ -2,6 +2,7 @@ package com.IssueWatch.API.services;
 
 import com.IssueWatch.API.dto.request.LoginRequest;
 import com.IssueWatch.API.dto.request.RegisterRequest;
+import com.IssueWatch.API.dto.response.AuthResponse;
 import com.IssueWatch.API.dto.response.MessageResponse;
 import com.IssueWatch.API.entities.Role;
 import com.IssueWatch.API.entities.User;
@@ -21,11 +22,13 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     public MessageResponse register(RegisterRequest request) {
@@ -50,7 +53,7 @@ public class AuthService {
         return new MessageResponse("User registered successfully");
     }
 
-    public MessageResponse login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadRequestException("Invalid email or password"));
 
@@ -67,7 +70,9 @@ public class AuthService {
             throw new BadRequestException("Invalid email or password");
         }
 
-        return new MessageResponse("Login successful");
+        String accessToken = jwtService.generateToken(user);
+
+        return new AuthResponse(accessToken);
     }
 
 }

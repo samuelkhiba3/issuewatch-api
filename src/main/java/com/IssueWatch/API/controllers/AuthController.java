@@ -2,6 +2,7 @@ package com.IssueWatch.API.controllers;
 
 import com.IssueWatch.API.dto.request.LoginRequest;
 import com.IssueWatch.API.dto.request.RegisterRequest;
+import com.IssueWatch.API.dto.response.AuthResponse;
 import com.IssueWatch.API.dto.response.MessageResponse;
 import com.IssueWatch.API.services.AuthService;
 import jakarta.validation.Valid;
@@ -31,8 +32,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<MessageResponse> login(@Valid @RequestBody LoginRequest request) {
-        MessageResponse response = authService.login(request);
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        AuthResponse response = authService.login(request);
 
         return ResponseEntity
                 .ok(response);
