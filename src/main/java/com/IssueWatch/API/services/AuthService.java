@@ -1,9 +1,12 @@
 package com.IssueWatch.API.services;
 
 import com.IssueWatch.API.dto.request.LoginRequest;
+import com.IssueWatch.API.dto.request.LogoutRequest;
+import com.IssueWatch.API.dto.request.RefreshRequest;
 import com.IssueWatch.API.dto.request.RegisterRequest;
 import com.IssueWatch.API.dto.response.AuthResponse;
 import com.IssueWatch.API.dto.response.MessageResponse;
+import com.IssueWatch.API.entities.RefreshToken;
 import com.IssueWatch.API.entities.Role;
 import com.IssueWatch.API.entities.User;
 import com.IssueWatch.API.enums.RoleName;
@@ -23,12 +26,14 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
-    public AuthService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtService jwtService, RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     public MessageResponse register(RegisterRequest request) {
@@ -71,8 +76,32 @@ public class AuthService {
         }
 
         String accessToken = jwtService.generateToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
-        return new AuthResponse(accessToken);
+        return new AuthResponse(
+                accessToken,
+                refreshToken.getToken()
+        );
     }
 
+    public AuthResponse refresh(RefreshRequest request) {
+        RefreshToken refreshToken = refreshTokenService.validateRefreshToken(
+                request.getRefreshToken()
+        );
+
+        User user = refreshToken.getUser();
+
+        String newAccessToken = jwtService.generateToken(user);
+
+        return new AuthResponse(
+                newAccessToken,
+                refreshToken.getToken()
+        );
+    }
+
+    public MessageResponse logout(LogoutRequest request) {
+        refreshTokenService.revokeRefreshToken(request.getRefreshToken());
+
+        return new MessageResponse("Logged out successfully");
+    }
 }

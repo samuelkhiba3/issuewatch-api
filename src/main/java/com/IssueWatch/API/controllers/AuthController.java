@@ -1,6 +1,8 @@
 package com.IssueWatch.API.controllers;
 
 import com.IssueWatch.API.dto.request.LoginRequest;
+import com.IssueWatch.API.dto.request.LogoutRequest;
+import com.IssueWatch.API.dto.request.RefreshRequest;
 import com.IssueWatch.API.dto.request.RegisterRequest;
 import com.IssueWatch.API.dto.response.AuthResponse;
 import com.IssueWatch.API.dto.response.MessageResponse;
@@ -37,5 +39,19 @@ public class AuthController {
 
         return ResponseEntity
                 .ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) {
+        AuthResponse response = authService.refresh(request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<MessageResponse> logout(@Valid @RequestBody LogoutRequest request) {
+        MessageResponse response = authService.logout(request);
+
+        return ResponseEntity.ok(response);
     }
 }
