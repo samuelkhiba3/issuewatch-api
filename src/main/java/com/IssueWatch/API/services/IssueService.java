@@ -3,9 +3,16 @@ package com.IssueWatch.API.services;
 import com.IssueWatch.API.dto.request.CreateIssueRequest;
 import com.IssueWatch.API.dto.response.IssueResponse;
 import com.IssueWatch.API.entities.Issue;
+import com.IssueWatch.API.entities.Role;
 import com.IssueWatch.API.entities.User;
+import com.IssueWatch.API.enums.RoleName;
+import com.IssueWatch.API.exceptions.ForbiddenException;
+import com.IssueWatch.API.exceptions.ResourceNotFoundException;
+import com.IssueWatch.API.exceptions.UnauthorizedException;
 import com.IssueWatch.API.repositories.IssueRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class IssueService {
@@ -61,5 +68,48 @@ public class IssueService {
         );
     }
 
+    public List<IssueResponse> getMyIssues() {
+        User user = currentUserService.getCurrentUser();
 
+        List<Issue> issues = issueRepository.findByReportedById(user.getId());
+
+        return issues.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private boolean hasRole(User user, RoleName roleName) {
+        return user.getRoles()
+                .stream()
+                .map(Role::getName)
+                .anyMatch(role -> role == roleName);
+    }
+
+    private boolean canViewIssue(Issue issue, User user) {
+        boolean isReporter = issue
+                .getReportedBy()
+                .getId()
+                .equals(user.getId());
+
+        boolean isAssignedSupport = issue.getAssignedTo() != null &&
+                issue.getAssignedTo().getId()
+                        .equals(user.getId());
+
+        boolean isSupportOrAdmin = hasRole(user, RoleName.ADMIN) || hasRole(user, RoleName.SUPPORT);
+
+        return isSupportOrAdmin || isAssignedSupport || isReporter;
+    }
+
+    public IssueResponse getIssueById(Long issueId) {
+        User currentUser = currentUserService.getCurrentUser();
+
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found"));
+
+        if (!canViewIssue(issue, currentUser)) {
+            throw new ForbiddenException("You do not have permission to view this issue");
+        }
+
+        return mapToResponse(issue);
+    }
 }

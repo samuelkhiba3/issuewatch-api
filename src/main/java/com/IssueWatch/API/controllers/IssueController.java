@@ -5,10 +5,9 @@ import com.IssueWatch.API.dto.response.IssueResponse;
 import com.IssueWatch.API.services.IssueService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/issues")
@@ -27,5 +26,19 @@ public class IssueController {
         return ResponseEntity
                 .status(201)
                 .body(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<IssueResponse>> getMyIssues() {
+        List<IssueResponse> responses = issueService.getMyIssues();
+
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<IssueResponse> getIssueById(@PathVariable Long id) {
+        IssueResponse response = issueService.getIssueById(id);
+
+        return ResponseEntity.ok(response);
     }
 }
