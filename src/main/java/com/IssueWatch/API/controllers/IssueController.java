@@ -2,6 +2,8 @@ package com.IssueWatch.API.controllers;
 
 import com.IssueWatch.API.dto.request.CreateIssueRequest;
 import com.IssueWatch.API.dto.response.IssueResponse;
+import com.IssueWatch.API.enums.IssuePriority;
+import com.IssueWatch.API.enums.IssueStatus;
 import com.IssueWatch.API.services.IssueService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -40,5 +42,14 @@ public class IssueController {
         IssueResponse response = issueService.getIssueById(id);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<IssueResponse>> getAllIssues(
+            @RequestParam(required = false) IssueStatus status,
+            @RequestParam(required = false) IssuePriority priority) {
+        List<IssueResponse> issues = issueService.getAllIssues(status, priority);
+
+        return ResponseEntity.ok(issues);
     }
 }
