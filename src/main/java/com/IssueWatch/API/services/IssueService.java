@@ -5,8 +5,6 @@ import com.IssueWatch.API.dto.response.IssueResponse;
 import com.IssueWatch.API.entities.Issue;
 import com.IssueWatch.API.entities.Role;
 import com.IssueWatch.API.entities.User;
-import com.IssueWatch.API.enums.IssuePriority;
-import com.IssueWatch.API.enums.IssueStatus;
 import com.IssueWatch.API.enums.RoleName;
 import com.IssueWatch.API.exceptions.ForbiddenException;
 import com.IssueWatch.API.exceptions.ResourceNotFoundException;
@@ -113,29 +111,5 @@ public class IssueService {
         }
 
         return mapToResponse(issue);
-    }
-
-    public List<IssueResponse> getAllIssues(IssueStatus status, IssuePriority priority) {
-        User currentUser = currentUserService.getCurrentUser();
-
-        if (!hasRole(currentUser, RoleName.ADMIN) && !hasRole(currentUser, RoleName.SUPPORT)) {
-            throw new ForbiddenException("You do not have permission to view all issues");
-        }
-
-        List<Issue> issues;
-
-        if (status !=null && priority != null) {
-            issues = issueRepository.findByStatusAndPriority(status, priority);
-        } else if (status != null) {
-            issues = issueRepository.findByStatus(status);
-        } else if (priority != null) {
-            issues = issueRepository.findByPriority(priority);
-        } else {
-            issues = issueRepository.findAll();
-        }
-
-        return issues.stream()
-                .map(this::mapToResponse)
-                .toList();
     }
 }
