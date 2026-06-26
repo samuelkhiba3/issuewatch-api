@@ -1,6 +1,9 @@
 package com.IssueWatch.API.controllers;
 
+import com.IssueWatch.API.dto.request.AssignIssuesRequest;
 import com.IssueWatch.API.dto.request.CreateIssueRequest;
+import com.IssueWatch.API.dto.request.UpdateIssuePriorityRequest;
+import com.IssueWatch.API.dto.request.UpdateIssueStatusRequest;
 import com.IssueWatch.API.dto.response.IssueResponse;
 import com.IssueWatch.API.enums.IssuePriority;
 import com.IssueWatch.API.enums.IssueStatus;
@@ -51,5 +54,26 @@ public class IssueController {
         List<IssueResponse> issues = issueService.getAllIssues(status, priority);
 
         return ResponseEntity.ok(issues);
+    }
+
+    @PatchMapping("/{id}/assign")
+    public ResponseEntity<IssueResponse> assignIssue(@PathVariable Long id, @Valid @RequestBody AssignIssuesRequest request) {
+        IssueResponse response = issueService.assignIssue(id, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<IssueResponse> updateIssueStatus(@PathVariable Long id, @RequestBody UpdateIssueStatusRequest request) {
+        IssueResponse response = issueService.updateIssueStatus(id, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/priority")
+    public ResponseEntity<IssueResponse> updateIssuePriority(@PathVariable Long id, @RequestBody UpdateIssuePriorityRequest request) {
+        IssueResponse response = issueService.updateIssuePriority(id, request);
+
+        return ResponseEntity.ok(response);
     }
 }
