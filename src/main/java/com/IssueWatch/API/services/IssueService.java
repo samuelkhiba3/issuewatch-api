@@ -50,7 +50,7 @@ public class IssueService {
         return mapToResponse(savedIssue);
     }
 
-    private Issue findIssueOrThrow(Long issueId) {
+    public Issue findIssueOrThrow(Long issueId) {
 
         return issueRepository.findById(issueId)
                 .orElseThrow(() -> new ResourceNotFoundException("Issue not found"));
@@ -93,14 +93,14 @@ public class IssueService {
                 .toList();
     }
 
-    private boolean hasRole(User user, RoleName roleName) {
+    public boolean hasRole(User user, RoleName roleName) {
         return user.getRoles()
                 .stream()
                 .map(Role::getName)
                 .anyMatch(role -> role == roleName);
     }
 
-    private boolean canViewIssue(Issue issue, User user) {
+    public boolean canViewIssue(Issue issue, User user) {
         boolean isReporter = issue
                 .getReportedBy()
                 .getId()
