@@ -1,7 +1,5 @@
 package com.IssueWatch.API.dto.response;
 
-import com.IssueWatch.API.entities.Role;
-
 import java.util.List;
 
 public class CurrentUserResponse {

@@ -1,8 +1,5 @@
 package com.IssueWatch.API.dto.response;
 
-import com.IssueWatch.API.entities.Issue;
-import com.IssueWatch.API.entities.User;
-
 import java.time.LocalDateTime;
 
 public class IssueCommentResponse {
