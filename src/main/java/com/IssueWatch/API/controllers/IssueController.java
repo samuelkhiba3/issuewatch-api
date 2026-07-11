@@ -52,6 +52,10 @@ public class IssueController {
     public ResponseEntity<PagedResponse<IssueResponse>> getAllIssues(
             @RequestParam(required = false) IssueStatus status,
             @RequestParam(required = false) IssuePriority priority,
+            @RequestParam(required = false) String affectedSystem,
+            @RequestParam(required = false) Long assignedToUserId,
+            @RequestParam(required = false) Long reportedByUserId,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -59,6 +63,10 @@ public class IssueController {
         PagedResponse<IssueResponse> response = issueService.getAllIssues(
                 status,
                 priority,
+                affectedSystem,
+                assignedToUserId,
+                reportedByUserId,
+                keyword,
                 page,
                 size,
                 sortBy,

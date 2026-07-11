@@ -172,14 +172,25 @@ public class IssueService {
         return page;
     }
 
+    private String normalizeTextFilter(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        return value.trim();
+    }
+
     public PagedResponse<IssueResponse> getAllIssues(
             IssueStatus status,
             IssuePriority priority,
+            String affectedSystem,
+            Long assignedToUserId,
+            Long reportedByUserId,
+            String keyword,
             int page,
             int size,
             String sortBy,
             String direction
-
     ) {
         User currentUser = currentUserService.getCurrentUser();
 
@@ -196,17 +207,15 @@ public class IssueService {
                 Sort.by(sortDirection, validateIssueSortField(sortBy))
         );
 
-        Page<Issue> issuePage;
-
-        if (status !=null && priority != null) {
-            issuePage = issueRepository.findByStatusAndPriority(status, priority, pageable);
-        } else if (status != null) {
-            issuePage = issueRepository.findByStatus(status, pageable);
-        } else if (priority != null) {
-            issuePage = issueRepository.findByPriority(priority, pageable);
-        } else {
-            issuePage = issueRepository.findAll(pageable);
-        }
+        Page<Issue> issuePage = issueRepository.searchIssues(
+                status,
+                priority,
+                normalizeTextFilter(affectedSystem),
+                reportedByUserId,
+                assignedToUserId,
+                normalizeTextFilter(keyword),
+                pageable
+        );
 
         List<IssueResponse> content = issuePage
                 .getContent()
