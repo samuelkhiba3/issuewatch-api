@@ -5,6 +5,7 @@ import com.IssueWatch.API.dto.request.CreateIssueRequest;
 import com.IssueWatch.API.dto.request.UpdateIssuePriorityRequest;
 import com.IssueWatch.API.dto.request.UpdateIssueStatusRequest;
 import com.IssueWatch.API.dto.response.IssueResponse;
+import com.IssueWatch.API.dto.response.PagedResponse;
 import com.IssueWatch.API.entities.Issue;
 import com.IssueWatch.API.entities.Role;
 import com.IssueWatch.API.entities.User;
@@ -17,6 +18,10 @@ import com.IssueWatch.API.exceptions.ResourceNotFoundException;
 import com.IssueWatch.API.repositories.IssueRepository;
 import com.IssueWatch.API.repositories.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -127,28 +132,98 @@ public class IssueService {
         return mapToResponse(issue);
     }
 
-    public List<IssueResponse> getAllIssues(IssueStatus status, IssuePriority priority) {
+    private String validateIssueSortField(String sortBy) {
+        List<String > allowedSortFields = List.of(
+                "id",
+                "title",
+                "affectedSystem",
+                "priority",
+                "status",
+                "createdAt",
+                "updatedAt",
+                "resolvedAt",
+                "closedAt"
+        );
+
+        if (!allowedSortFields.contains(sortBy)) {
+            throw new BadRequestException("Invalid sort field: " + sortBy);
+        }
+
+        return sortBy;
+    }
+
+    private int validatePageSize(int size) {
+        if (size < 1) {
+            throw new BadRequestException("Page size must be at least 1");
+        }
+
+        if (size > 100) {
+            throw new BadRequestException("Page size cannot exceed 100");
+        }
+
+        return size;
+    }
+
+    private int validatePageNumber(int page) {
+        if (page < 0) {
+            throw new BadRequestException("Page number cannot be negative");
+        }
+
+        return page;
+    }
+
+    public PagedResponse<IssueResponse> getAllIssues(
+            IssueStatus status,
+            IssuePriority priority,
+            int page,
+            int size,
+            String sortBy,
+            String direction
+
+    ) {
         User currentUser = currentUserService.getCurrentUser();
 
         if (!hasRole(currentUser, RoleName.ADMIN) && !hasRole(currentUser, RoleName.SUPPORT)) {
             throw new ForbiddenException("You do not have permission to view all issues");
         }
 
-        List<Issue> issues;
+        Sort.Direction sortDirection  = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(
+                validatePageNumber(page),
+                validatePageSize(size),
+                Sort.by(sortDirection, validateIssueSortField(sortBy))
+        );
+
+        Page<Issue> issuePage;
 
         if (status !=null && priority != null) {
-            issues = issueRepository.findByStatusAndPriority(status, priority);
+            issuePage = issueRepository.findByStatusAndPriority(status, priority, pageable);
         } else if (status != null) {
-            issues = issueRepository.findByStatus(status);
+            issuePage = issueRepository.findByStatus(status, pageable);
         } else if (priority != null) {
-            issues = issueRepository.findByPriority(priority);
+            issuePage = issueRepository.findByPriority(priority, pageable);
         } else {
-            issues = issueRepository.findAll();
+            issuePage = issueRepository.findAll(pageable);
         }
 
-        return issues.stream()
+        List<IssueResponse> content = issuePage
+                .getContent()
+                .stream()
                 .map(this::mapToResponse)
                 .toList();
+
+        return new PagedResponse<>(
+                content,
+                issuePage.getNumber(),
+                issuePage.getSize(),
+                issuePage.getTotalElements(),
+                issuePage.getTotalPages(),
+                issuePage.isFirst(),
+                issuePage.isLast()
+
+        );
     }
 
     @Transactional

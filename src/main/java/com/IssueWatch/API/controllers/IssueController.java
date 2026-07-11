@@ -5,6 +5,7 @@ import com.IssueWatch.API.dto.request.CreateIssueRequest;
 import com.IssueWatch.API.dto.request.UpdateIssuePriorityRequest;
 import com.IssueWatch.API.dto.request.UpdateIssueStatusRequest;
 import com.IssueWatch.API.dto.response.IssueResponse;
+import com.IssueWatch.API.dto.response.PagedResponse;
 import com.IssueWatch.API.enums.IssuePriority;
 import com.IssueWatch.API.enums.IssueStatus;
 import com.IssueWatch.API.services.IssueService;
@@ -48,12 +49,22 @@ public class IssueController {
     }
 
     @GetMapping
-    public ResponseEntity<List<IssueResponse>> getAllIssues(
+    public ResponseEntity<PagedResponse<IssueResponse>> getAllIssues(
             @RequestParam(required = false) IssueStatus status,
-            @RequestParam(required = false) IssuePriority priority) {
-        List<IssueResponse> issues = issueService.getAllIssues(status, priority);
+            @RequestParam(required = false) IssuePriority priority,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+        PagedResponse<IssueResponse> response = issueService.getAllIssues(
+                status,
+                priority,
+                page,
+                size,
+                sortBy,
+                direction);
 
-        return ResponseEntity.ok(issues);
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/assign")
