@@ -18,11 +18,13 @@ public class IssueCommentService {
     private final IssueCommentRepository issueCommentRepository;
     private final IssueService issueService;
     private final CurrentUserService currentUserService;
+    private final NotificationService notificationService;
 
-    public IssueCommentService(IssueService issueService, IssueCommentRepository issueCommentRepository, CurrentUserService currentUserService) {
+    public IssueCommentService(IssueService issueService, IssueCommentRepository issueCommentRepository, CurrentUserService currentUserService, NotificationService notificationService) {
         this.currentUserService = currentUserService;
         this.issueService = issueService;
         this.issueCommentRepository = issueCommentRepository;
+        this.notificationService = notificationService;
     }
 
     private IssueCommentResponse mapToResponse(IssueComment comment) {
@@ -61,6 +63,10 @@ public class IssueCommentService {
         );
 
         IssueComment savedComment = issueCommentRepository.save(issueComment);
+
+        if (!savedComment.isInternal()) {
+            notificationService.notifyNewComment(issue, currentUser);
+        }
 
         return mapToResponse(savedComment);
     }

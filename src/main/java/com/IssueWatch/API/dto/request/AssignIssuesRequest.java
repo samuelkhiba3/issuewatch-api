@@ -1,10 +1,10 @@
 package com.IssueWatch.API.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class AssignIssuesRequest {
 
-    @NotBlank(message = "Support user ID is required")
+    @NotNull(message = "Support user ID is required")
     private Long supportUserId;
 
     public Long getSupportUserId() {

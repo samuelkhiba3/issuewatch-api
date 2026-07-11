@@ -32,11 +32,13 @@ public class IssueService {
     private final IssueRepository issueRepository;
     private final CurrentUserService currentUserService;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
-    public IssueService(IssueRepository issueRepository, CurrentUserService currentUserService, UserRepository userRepository) {
+    public IssueService(IssueRepository issueRepository, CurrentUserService currentUserService, UserRepository userRepository, NotificationService notificationService) {
         this.issueRepository = issueRepository;
         this.currentUserService = currentUserService;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     public IssueResponse createIssue(CreateIssueRequest request) {
@@ -51,6 +53,8 @@ public class IssueService {
         );
 
         Issue savedIssue = issueRepository.save(issue);
+
+        notificationService.notifyIssueCreated(savedIssue);
 
         return mapToResponse(savedIssue);
     }
@@ -256,6 +260,8 @@ public class IssueService {
 
         Issue savedIssue = issueRepository.save(issue);
 
+        notificationService.notifyIssueAssigned(savedIssue);
+
         return mapToResponse(savedIssue);
     }
 
@@ -279,7 +285,9 @@ public class IssueService {
 
         issue.changeStatus(request.getStatus());
 
-        issueRepository.save(issue);
+        Issue savedIssue = issueRepository.save(issue);
+
+        notificationService.notifyIssueStatusChanged(savedIssue);
 
         return mapToResponse(issue);
     }
