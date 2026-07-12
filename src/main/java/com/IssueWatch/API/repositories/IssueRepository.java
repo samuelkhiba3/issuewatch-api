@@ -62,4 +62,12 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
             @Param("keyword") String keyword,
             Pageable pageable
     );
+
+    @Query("""
+            SELECT i
+            FROM Issue i
+            WHERE i.priority IN (com.IssueWatch.API.enums.IssuePriority.HIGH, com.IssueWatch.API.enums.IssuePriority.CRITICAL)
+                AND i.status NOT IN (com.IssueWatch.API.enums.IssueStatus.RESOLVED, com.IssueWatch.API.enums.IssueStatus.CLOSED)
+            """)
+    List<Issue> findUnresolvedHighPriorityIssues();
 }

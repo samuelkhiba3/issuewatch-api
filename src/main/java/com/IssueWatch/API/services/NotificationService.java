@@ -154,4 +154,45 @@ public class NotificationService {
                 body
         );
     }
+
+    public void notifyUnresolvedIssueReminder(Issue issue) {
+        if (issue.getAssignedTo() == null) {
+            return;
+        }
+
+        User supportUser = issue.getAssignedTo();
+
+        String subject = "Reminder: unresolved issue - " + issue.getTitle();
+
+        String body = """
+            Hi %s,
+
+            This is a reminder that the following issue is still unresolved.
+
+            Issue: %s
+            Affected system: %s
+            Priority: %s
+            Status: %s
+            Reported by: %s
+
+            Please review and update the issue when possible.
+
+            Regards,
+            IssueWatch
+            """
+                .formatted(
+                        supportUser.getName(),
+                        issue.getTitle(),
+                        issue.getAffectedSystem(),
+                        issue.getPriority(),
+                        issue.getStatus(),
+                        issue.getReportedBy().getName()
+                );
+
+        emailService.sendEmail(
+                supportUser.getEmail(),
+                subject,
+                body
+        );
+    }
 }
