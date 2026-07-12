@@ -2,6 +2,7 @@ package com.IssueWatch.API.controllers;
 
 import com.IssueWatch.API.dto.response.IssueAttachmentResponse;
 import com.IssueWatch.API.services.IssueAttachmentService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-@Controller
+@Tag(name = "Issue Attachments", description = "Upload, View, and download endpoints")
+@RestController
 @RequestMapping("/api/issues/{issueId}/attachments")
 public class IssueAttachmentController {
 

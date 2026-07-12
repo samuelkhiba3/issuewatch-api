@@ -3,6 +3,7 @@ package com.IssueWatch.API.controllers;
 import com.IssueWatch.API.dto.request.CreateIssueCommentRequest;
 import com.IssueWatch.API.dto.response.IssueCommentResponse;
 import com.IssueWatch.API.services.IssueCommentService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -10,7 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@Tag(name = "Issue Comments", description = "Add and View endpoints")
+@RestController
 @RequestMapping("/api/issues/{issueId}/comments")
 public class IssueCommentController {
 

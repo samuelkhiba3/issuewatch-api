@@ -9,12 +9,14 @@ import com.IssueWatch.API.dto.response.PagedResponse;
 import com.IssueWatch.API.enums.IssuePriority;
 import com.IssueWatch.API.enums.IssueStatus;
 import com.IssueWatch.API.services.IssueService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Issues", description = "Issue reporting, searching, assignment, and workflow endpoints")
 @RestController
 @RequestMapping("/api/issues")
 public class IssueController {
